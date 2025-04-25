@@ -2,6 +2,7 @@ import express from "express";
 import { connectDB } from "./config/database.js";
 import { User } from "./models/users.js";
 import { validateSignUpData } from "./utils/validation.js";
+import bcrypt from 'bcryptjs';
 
 const app = express();
 app.use(express.json());//this middleware is very important b'coz it read the data from the request body and convert it into json 
@@ -9,22 +10,34 @@ app.use(express.json());//this middleware is very important b'coz it read the da
 //we ae creating a signup api for user to enter firstname, lastname , email and password
 app.post('/signup', async (req, res) => {
   try {
-  //for data validation
-  validateSignUpData(req);
+    //for data validation
+    validateSignUpData(req);
 
-  //{ console.log(req);
-  // console.log(req.body);
-  // res.send("signup post request");
-  //🔶creating a new instance of the User model🔶}
-  const user = new User(req.body);
-  //{ hardcoded values are passed below but actually it doesn,t happens
-  // const user = new User({
-  //   firstName: "Kartik" , 
-  //   lastName: "Thakur",
-  //   email: "thakurkartik@gmail.com",
-  //   password: "IAF123"
-  //   });}
-  
+    //logic for password encryption..
+    const { firstName, lastName, emailID , password } = req.body;
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // console.log(req);
+    // console.log(req.body);
+    // res.send("signup post request");
+    //🔶creating a new instance of the User model🔶
+    //hardcoded values are passed below but actually it doesn,t happens
+    // const user = new User({
+    //   firstName: "Kartik" , 
+    //   lastName: "Thakur",
+    //   email: "thakurkartik@gmail.com",
+    //   password: "IAF123"
+    //   });
+    //
+    //🔶creating a new instance of the User model🔶
+    // const user = new User(req.body); req.body is not good way, we have explicitly specify the data here
+    const user = new User({
+      firstName,
+      lastName,
+      emailID,
+      password: passwordHash
+    });
+
     await user.save();
     res.send("User added successfully!!!!!!!!!!!!");
   } catch (err) {
@@ -32,6 +45,27 @@ app.post('/signup', async (req, res) => {
   }
 });
 
+
+app/post('/login', async (req, res) => {
+try{
+  const {emailID, password} = req.body;
+  const user = User.findOne({emailID:emailID});
+  if (!user) {
+    throw new Error("Invalid Credentials");
+  }
+
+ const isPasswordValid = await bcrypt.compare(password , user.password);
+ if(!isPasswordValid){
+throw new Error("Invalid Email or Password");
+
+ }else(
+  res.send("Login Successful!")
+ )
+}
+catch(err){
+res.status(400).send("Error" + err.message);
+}
+})
 
 // find user from the database based on firstName. To do that just go to postman select HTTP->get resquest ->enter URL-> select body->raw-> json and enter data to be find out.
 app.get("/user", async (req, res) => {
@@ -96,12 +130,12 @@ app.delete("/user", async (req, res) => {
 app.patch("/user", async (req, res) => {
   const userId = req.body.userId;
   const data = req.body;
- 
+
   try {
     const Allowed_Updates = ["photoUrl", "about", "skills", "age", "gender", "password"];
     const isUpdateAllowed = Object.keys(data).every((k) => { Allowed_Updates.includes(k) });
-    if(!isUpdateAllowed){
-    throw new Error("Update Not Allowed");
+    if (!isUpdateAllowed) {
+      throw new Error("Update Not Allowed");
     }
     await User.findByIdAndUpdate({ _id: userId }, data, { runValidators: true, returnDocument: "after" });
 

@@ -9,7 +9,7 @@
   "author": "Vaishnavi",
   "license": "ISC",
   "dependencies": {
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.2",
     "express": "^4.21.2",
     "mongoose": "^8.9.4",
     "validator": "^13.15.0"
