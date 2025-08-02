@@ -1,87 +1,33 @@
 import express from "express";
 import { connectDB } from "./config/database.js";
 import { User } from "./models/users.js";
-import { validateSignUpData } from "./utils/validation.js";
-import bcrypt from 'bcryptjs';
 import cookieParser from 'cookie-parser';
-import jwt from 'jsonwebtoken';
-
+import authRouter from "./routes/auth.js";
+import profileRoute from "./routes/profile.js";
+import cors from 'cors';
+import connectionRequestRoute from "./routes/connectionRequest.js";
+import userRouter from "./routes/user.js";
+import PaymentRoute from "./routes/paymentRoute.js";
+import http from "http"
+import initializeSockets from "./utils/socket.js";
 const app = express();
-
+const server = http.createServer(app)
+app.use(cors(
+  {
+    origin: "http://localhost:5173",
+    credentials: true,
+  }
+))
 app.use(express.json());//this middleware is very important b'coz it read the data from the request body and convert it into json 
 app.use(cookieParser());
 
-//we ae creating a signup api for user to enter firstname, lastname , email and password
-app.post('/signup', async (req, res) => {
-  try {
-    //for data validation
-    validateSignUpData(req);
-
-    //logic for password encryption..
-    const { firstName, lastName, emailId, password } = req.body;
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    // console.log(req);
-    // console.log(req.body);
-    // res.send("signup post request");
-    //🔶creating a new instance of the User model🔶
-    //hardcoded values are passed below but actually it doesn,t happens
-    // const user = new User({
-    //   firstName: "Kartik" , 
-    //   lastName: "Thakur",
-    //   email: "thakurkartik@gmail.com",
-    //   password: "IAF123"
-    //   });
-    //
-    //🔶creating a new instance of the User model🔶
-    // const user = new User(req.body); req.body is not good way, we have explicitly specify the data here
-    const user = new User({
-      firstName,
-      lastName,
-      emailId,
-      password: passwordHash,
-    });
-
-    await user.save();
-    res.send("User added successfully!!!!!!!!!!!!");
-  } catch (err) {
-    res.status(400).send("Error occur while starting the app: " + err.message);
-  }
-});
+app.use('/', authRouter);
+app.use('/', connectionRequestRoute);
+app.use('/', profileRoute);
+app.use('/', userRouter);
+app.use('/', PaymentRoute);
 
 
-app.post('/login', async (req, res) => {
-  try {
-    const { emailId, password } = req.body;
-    const user = await User.findOne({ emailId: emailId });
-    if (!user) {
-      throw new Error("Invalid Credentials");
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (isPasswordValid) {
-      // logic for cookie & user authentication
-      //create a jwt token add the token to the cookie and send the response abck to the user.
-      //
-      res.cookie("token", "asdnbierkhsfnugrtkldfasjdhujasndjsnjdcvuifiepsold");
-      res.send("Login Successful!")
-
-
-    } else {
-      throw new Error("Invalid Email or Password");
-
-    }
-  }
-  catch (err) {
-    res.status(400).send("Error : " + err.message);
-  }
-})
-
-app.get("/profile", (req,res)=>{
-  const cookies = req.cookies;
-console.log(cookies);
-res.send("reading cookies");
-})
 
 // find user from the database based on firstName. To do that just go to postman select HTTP->get resquest ->enter URL-> select body->raw-> json and enter data to be find out.
 app.get("/user", async (req, res) => {
@@ -168,9 +114,10 @@ app.patch("/user", async (req, res) => {
 
 })
 
+initializeSockets(server);
 connectDB().then(() => {
   console.log("DB Connection Established");
-  app.listen(7777, () => {
+  server.listen(7777, () => {
     console.log('Execution Done!!!! Server is Successfully listening!!!!');
   });
 })

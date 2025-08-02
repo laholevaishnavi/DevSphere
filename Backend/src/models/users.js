@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 import validator from 'validator';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 const userSchema = mongoose.Schema(
   {
 
@@ -59,11 +61,34 @@ const userSchema = mongoose.Schema(
     skills: {
       type: [String],
     },
+    isPremium :{
+      type: Boolean,
+      default: false,
+    },
+    membershipType : {
+      type: String,
+    }
 
   },
   {
     timestamps: true
-  })
+  });
+
+  userSchema.methods.validatePassword = async function (passwordInputByUser){
+        const user = this;
+        const passwordHash = user.password;
+        const isPasswordValid = await bcrypt.compare(passwordInputByUser, passwordHash);
+        return isPasswordValid
+  ;  
+  }
+
+userSchema.methods.getJWT = async function () {
+  const user = this;
+  const token = await jwt.sign({userId: user._id },process.env.JWT_SECRET,{
+    expiresIn: "7d",
+  });
+  return token
+}
 
 export const User = mongoose.model("User", userSchema);
 //Users == User b'coz mongoose pluralize the model name....
