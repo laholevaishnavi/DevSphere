@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import { Send } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
-import socket from "../utils/socket"; // ✅ correct import
+import { createSocketConnection } from "../utils/socket"; // ✅ correct import
+import { BASE_URL } from "../utils/constants";
+import axios from "axios";
+import { useRef } from "react";
 
 const Chat = () => {
   const { target_id } = useParams();
@@ -21,51 +24,80 @@ const Chat = () => {
 
   const [messageText, setMessageText] = useState("");
   const [messages, setMessages] = useState([]);
+  const socketRef = useRef(null);
+
+  const fetchChatMessages = async () => {
+    const chat = await axios.get(BASE_URL + "/chat/" + target_id, {
+      withCredentials: true,
+    });
+
+    console.log(chat.data.messages);
+
+    const chatMessages = chat?.data?.messages.map((msg) => ({
+      username: `${msg.senderId?.firstName} ${msg.senderId?.lastName}`,
+      text: msg.text,
+      time: new Date(msg.createdAt).toLocaleTimeString(),
+      sentByMe: msg.senderId?._id === user_id,
+    }));
+
+    setMessages(chatMessages);
+  };
 
   useEffect(() => {
-    if (user_id && target_id) {
-      socket.emit("joinChat", { user_id, target_id });
+    fetchChatMessages();
+  }, [target_id]);
+
+  useEffect(() => {
+    if (!user_id) {
+      return;
     }
+    const socket = createSocketConnection();
+    socketRef.current = socket;
+    // As soon as the page loaded, the socket connection is made and joinChat event is emitted
+    socket.emit("joinChat", {
+      firstName: user.firstName,
+      user_id,
+      target_id,
+    });
 
-    socket.on("messageReceived", ({ firstName, user_id: senderId, text }) => {
-  if (senderId === user_id) return; // Don't add your own message again
-
-  setMessages((prev) => [
-    ...prev,
-    {
-      username: firstName,
-      time: new Date().toLocaleTimeString(),
-      text,
-      sentByMe: false,
-    },
-  ]);
-});
-
+    socket.on("messageReceived", ({ senderId, firstName, lastName, text }) => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          username: `${firstName} ${lastName}`,
+          text,
+          time: new Date().toLocaleTimeString(),
+          sentByMe: senderId === user_id,
+        },
+      ]);
+    });
 
     return () => {
-      socket.off("messageReceived");
+      socket.disconnect();
+      // socketRef.current = null;
     };
   }, [user_id, target_id]);
 
   const sendMessage = () => {
-    socket.emit("sendMessage", {
-      firstName: user.firstName,
-      lastName: user.lastName,
+    if (!messageText.trim()) return;
+
+    const newMsg = {
+      username: `${user.firstName} ${user.lastName}`,
+      text: messageText,
+      time: new Date().toLocaleTimeString(),
+      sentByMe: true,
+    };
+
+    // Use the single socket connection
+    socketRef.current?.emit("sendMessage", {
+      ...newMsg,
       user_id,
       target_id,
-      text: messageText,
+      firstName: user.firstName,
+      lastName: user.lastName,
     });
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        username: `${user.firstName} ${user.lastName}`,
-        time: new Date().toLocaleTimeString(),
-        text: messageText,
-        sentByMe: true,
-      },
-    ]);
-
+    setMessages((prev) => [...prev, newMsg]);
     setMessageText("");
   };
 
@@ -79,18 +111,24 @@ const Chat = () => {
       {/* Chat Body */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((msg, idx) => (
-  <div key={idx} className={`chat ${msg.sentByMe ? "chat-end" : "chat-start"}`}>
-    <div className="chat-header">
-      {msg.username}
-      <time className="text-xs opacity-50 ml-2">{msg.time}</time>
-    </div>
-    <div className={`chat-bubble ${msg.sentByMe ? "chat-bubble-accent" : "chat-bubble-info"}`}>
-      {msg.text}
-    </div>
-    <div className="chat-footer opacity-50">Delivered</div>
-  </div>
-))}
-
+          <div
+            key={idx}
+            className={`chat ${msg.sentByMe ? "chat-end" : "chat-start"}`}
+          >
+            <div className="chat-header">
+              {msg.username}
+              <time className="text-xs opacity-50 ml-2">{msg.time}</time>
+            </div>
+            <div
+              className={`chat-bubble ${
+                msg.sentByMe ? "chat-bubble-accent" : "chat-bubble-info"
+              }`}
+            >
+              {msg.text}
+            </div>
+            <div className="chat-footer opacity-50">Delivered</div>
+          </div>
+        ))}
       </div>
 
       {/* Chat Input */}

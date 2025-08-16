@@ -10,6 +10,7 @@ import userRouter from "./routes/user.js";
 import PaymentRoute from "./routes/paymentRoute.js";
 import http from "http"
 import initializeSockets from "./utils/socket.js";
+import chatRouter from "./routes/chat.js";
 const app = express();
 const server = http.createServer(app)
 app.use(cors(
@@ -26,6 +27,7 @@ app.use('/', connectionRequestRoute);
 app.use('/', profileRoute);
 app.use('/', userRouter);
 app.use('/', PaymentRoute);
+app.use('/', chatRouter);
 
 
 

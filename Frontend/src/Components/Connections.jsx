@@ -3,17 +3,18 @@ import { useDispatch, useSelector } from "react-redux";
 import { addConnections, removeConnection } from "../utils/connectionSlice";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { BASE_URL } from "../utils/constants";
 
 const Connections = () => {
-  const connections = useSelector((store) => store.connection);
+  const connections = useSelector((state) => state.connection);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   // console.log(connections);
 
-  const removeConnection = async (touserId) => {
+  const handleRemoveConnection = async (touserId) => {
     try {
       const res = await axios.post(
-        `http://localhost:7777/request/send/${status}/${toUserId}`,
+        `${BASE_URL}/request/send/${status}/${toUserId}`,
         {},
         { withCredentials: true }
       );
@@ -33,12 +34,13 @@ const Connections = () => {
   const fetchConnectionData = async () => {
     try {
       const connection = await axios.get(
-        "http://localhost:7777/user/connections",
+        BASE_URL + "/user/connections",
         { withCredentials: true }
       );
       console.log(connection.data.data);
       dispatch(addConnections(connection.data.data));
     } catch (error) {
+
       throw new Error("Error" + error.message);
     }
   };
@@ -75,7 +77,7 @@ const Connections = () => {
               </button>
               <button
                 onClick={() => {
-                  removeConnection(user._id);
+                  handleRemoveConnection(user._id);
                 }}
                 className="btn  btn-outline btn-error btn-sm"
               >

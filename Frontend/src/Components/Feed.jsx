@@ -4,6 +4,7 @@ import { Loader2, UserRoundIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import { addFeed, removeUserFromFeed } from "../utils/feedSlice";
+import { BASE_URL } from "../utils/constants";
 
 
 const Feed = () => {
@@ -18,7 +19,7 @@ const Feed = () => {
 
    const fetchPosts = async () => {
       try {
-        const res = await axios.get(`http://localhost:7777/user/feed`, {
+        const res = await axios.get(BASE_URL + `/user/feed`, {
           withCredentials: true,
         });
         // console.log(res.data.data[1]._id);
@@ -40,14 +41,14 @@ const Feed = () => {
 
   // Handle interest/ignore
   const handleInterested = async( status, toUserId) => {
-    const res = await axios.post(`http://localhost:7777/request/send/${status}/${toUserId}`,{},{withCredentials: true});
+    const res = await axios.post(BASE_URL + `/request/send/${status}/${toUserId}`,{},{withCredentials: true});
     dispatch(removeUserFromFeed(toUserId));
     console.log("Interested in:", toUserId);
     // You can send request to backend here
   };
 
   const handleIgnore = async(status,toUserId) => {
-    const res = await axios.post(`http://localhost:7777/request/send/${status}/${toUserId}`,{},{withCredentials: true});
+    const res = await axios.post(BASE_URL + `/request/send/${status}/${toUserId}`,{},{withCredentials: true});
     dispatch(removeUserFromFeed(toUserId));
     console.log("Not interested in:", toUserId);
   };
@@ -133,3 +134,5 @@ const Feed = () => {
 };
 
 export default Feed;
+
+

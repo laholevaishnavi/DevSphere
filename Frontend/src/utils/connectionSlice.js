@@ -5,7 +5,10 @@ const connectionSlice = createSlice({
   initialState : [],
   reducers :{
     addConnections:(state , action)=>{return action.payload},
-    removeConnection:(state,action)=>{return null},
+    removeConnection: (state, action) => {
+  return state.filter(user => user._id !== action.payload);
+}
+,
   }
 });
 

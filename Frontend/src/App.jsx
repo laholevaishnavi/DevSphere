@@ -3,6 +3,7 @@ import Layout from './Components/Layout';
 import Profile from './Components/Profile.jsx';
 import Login from './Components/Login.jsx';
 import Connections from './Components/Connections.jsx';
+import ProtectedRoute from './Components/ProtectedRoute.jsx';
 import Feed from './Components/Feed.jsx';
 import Requests from './Components/Requests.jsx';
 import { Toaster } from 'react-hot-toast';
@@ -17,14 +18,64 @@ const App = () => {
 <Toaster position="top-center" />
 
 <Routes>
-<Route path="/" element={<Layout/>} >
-<Route path="/" element={<Feed/>}/>
-<Route path="/login" element={<Login/>}/>
-<Route path="/profile" element={<Profile/>}/>
-<Route path="/connections" element={<Connections/>}/>
-<Route path="/requests" element={<Requests/>}/>
-<Route path="/premium" element={<PremiumPayment/>}/>
-<Route path="/chats/:target_id" element={<Chat/>}/>
+<Route path="/" element={<Layout/>}>
+  <Route
+    path="/"
+    element={
+      <ProtectedRoute>
+        <Feed />
+      </ProtectedRoute>
+    }
+  />
+   <Route
+        path="/feed"
+        element={
+          <ProtectedRoute>
+            <Feed />
+          </ProtectedRoute>
+        }
+      />
+  <Route path="/login" element={<Login/>}/>
+  <Route
+    path="/profile"
+    element={
+      <ProtectedRoute>
+        <Profile />
+      </ProtectedRoute>
+    }
+  />
+  <Route
+    path="/connections"
+    element={
+      <ProtectedRoute>
+        <Connections />
+      </ProtectedRoute>
+    }
+  />
+  <Route
+    path="/requests"
+    element={
+      <ProtectedRoute>
+        <Requests />
+      </ProtectedRoute>
+    }
+  />
+  <Route
+    path="/premium"
+    element={
+      <ProtectedRoute>
+        <PremiumPayment />
+      </ProtectedRoute>
+    }
+  />
+  <Route
+    path="/chats/:target_id"
+    element={
+      <ProtectedRoute>
+        <Chat />
+      </ProtectedRoute>
+    }
+  />
 </Route>
 </Routes>
 </BrowserRouter>

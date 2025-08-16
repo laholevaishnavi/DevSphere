@@ -32,7 +32,7 @@ const Login = () => {
       dispatch(addUser(response.data));
       toast.dismiss();
       toast.success("Logged in successfully!");
-      return navigate("/");
+      navigate("/feed");
     } catch (err) {
       toast.dismiss();
       toast.error("Login failed! Please check your credentials.");
