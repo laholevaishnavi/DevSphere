@@ -2,6 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addRequest, removeRequest } from "../utils/requestSlice";
 import { useEffect } from "react";
 import axios from "axios";
+import { BASE_URL } from "../utils/constants";
 
 const Requests = () => {
   const requests = useSelector((store) => store.request) || [];
@@ -9,8 +10,8 @@ const Requests = () => {
 
   const fetchRequests = async () => {
     try {
-      const req = await axios.get(
-        "http://localhost:7777/user/request/received",
+      const req = await axios.get(BASE_URL + 
+        "/user/request/received",
         { withCredentials: true }
       );
 
@@ -24,7 +25,7 @@ const Requests = () => {
     try {
       
       await axios.post(
-        `http://localhost:7777/request/review/accepted/${id}`,
+        BASE_URL + `/request/review/accepted/${id}`,
         {},
         { withCredentials: true }
       );
@@ -37,7 +38,7 @@ const Requests = () => {
   const handleIgnore = async (id) => {
     try {
       await axios.post(
-        `http://localhost:7777/request/review/rejected/${id}`,
+        BASE_URL + `/request/review/rejected/${id}`,
         {},
         { withCredentials: true }
       );
