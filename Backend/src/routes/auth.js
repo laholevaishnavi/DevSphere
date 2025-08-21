@@ -38,7 +38,11 @@ authRouter.post('/login', async (req, res) => {
     const isPasswordValid = await user.validatePassword(password);
     if (isPasswordValid) {
       const token = await user.getJWT();
-      res.cookie("token", token);
+      res.cookie("token", token,{
+        httpOnly: true,
+        secure: true,       // production साठी
+        sameSite: "None",   // कारण frontend + backend वेगळ्या domains वर आहेत
+      });
       res.send(user);
     }
     else {
