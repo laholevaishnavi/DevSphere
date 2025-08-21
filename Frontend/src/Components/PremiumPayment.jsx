@@ -1,6 +1,7 @@
 import React from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { BASE_URL } from "../utils/constants";
 
 
 
@@ -29,7 +30,7 @@ const PLANS = [
 
 const handlePayment = async (type) => {
   const order = await axios.post(
-    "http://localhost:7777/payment/order",
+    BASE_URL+"/payment/order",
     { membershipType: type },
     { withCredentials: true }
   );

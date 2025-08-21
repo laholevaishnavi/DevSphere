@@ -40,7 +40,6 @@ const Connections = () => {
       console.log(connection.data.data);
       dispatch(addConnections(connection.data.data));
     } catch (error) {
-
       throw new Error("Error" + error.message);
     }
   };

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import UserCard from "./UserCard";
+import { BASE_URL } from "../utils/constants";
 import axios from "axios";
 import { addUser } from "../utils/userSlice";
 
@@ -29,7 +29,7 @@ const EditProfile = ({ user }) => {
 
    const handleChanges = async()=>{
     try {
-      const data = await axios.patch('http://localhost:7777/profile/edit',{firstName,lastName,age,gender,photoUrl: photo,about,skills},{withCredentials:true});
+      const data = await axios.patch(BASE_URL + '/profile/edit',{firstName,lastName,age,gender,photoUrl: photo,about,skills},{withCredentials:true});
       dispatch(addUser(data.data));
       console.table(data);
     } catch (error) {

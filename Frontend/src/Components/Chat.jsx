@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Send } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { createSocketConnection } from "../utils/socket"; // ✅ correct import
+import { createSocketConnection } from "../utils/socket"; 
 import { BASE_URL } from "../utils/constants";
 import axios from "axios";
 import { useRef } from "react";

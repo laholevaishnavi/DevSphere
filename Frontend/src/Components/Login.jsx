@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 // import FeedBackground3D from "./FeedBackground3D";
+import { BASE_URL } from "../utils/constants";
 
 const Login = () => {
   const [firstName, setFirstName] = useState(" ");
@@ -22,7 +23,7 @@ const Login = () => {
     toast.loading("Logging in...");
     try {
       const response = await axios.post(
-        "http://localhost:7777/login",
+        BASE_URL+"/login",
         {
           emailId: EmailId,
           password: Password,
@@ -43,7 +44,7 @@ const Login = () => {
     toast.loading("Creating Account...");
     try {
       const response = await axios.post(
-        "http://localhost:7777/signup",
+        BASE_URL+"/signup",
         {
           firstName: firstName,
           lastName: lastName,

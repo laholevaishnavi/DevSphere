@@ -13,9 +13,14 @@ import initializeSockets from "./utils/socket.js";
 import chatRouter from "./routes/chat.js";
 const app = express();
 const server = http.createServer(app)
+
+const allowedOrigins = [
+  "http://localhost:5173",                // local dev
+  "https://devsphereweb.onrender.com"     // deployed frontend
+];
 app.use(cors(
   {
-    origin: "http://localhost:5173",
+    origin: allowedOrigins,
     credentials: true,
   }
 ))
